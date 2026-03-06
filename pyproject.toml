@@ -4,6 +4,9 @@ version = "0.16.3"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.10"
+dependencies = [
+    "redis>=7.2.1",
+]
 
 [project.urls]
 homepage = "https://www.comfy.org/"
