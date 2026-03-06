@@ -395,7 +395,9 @@ def start_comfyui(asyncio_loop=None):
     hook_breaker_ac10a0.restore_functions()
 
     from comfy_extras.web_builtins import register as register_web_builtins
+    from comfy_extras.telemetry_routes import register as register_telemetry_routes
     register_web_builtins()
+    register_telemetry_routes(prompt_server.routes)
 
     cuda_malloc_warning()
     setup_database()

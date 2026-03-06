@@ -10,6 +10,7 @@ _ROOT = Path(__file__).parent.parent / "web_builtins"
 
 _BUILTINS = {
     "block-space": _ROOT / "block_space",
+    "vf-telemetry": _ROOT / "telemetry",
 }
 
 
