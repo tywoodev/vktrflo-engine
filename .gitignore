@@ -1,8 +1,11 @@
 __pycache__/
 *.py[cod]
+/output
 /output/
+/input
 /input/
 !/input/example.png
+/models
 /models/
 /temp/
 /custom_nodes/
@@ -19,6 +22,9 @@ venv*/
 /tests-ui/data/object_info.json
 /user/
 *.log
+prompts.db
+prompts.db-shm
+prompts.db-wal
 web_custom_versions/
 .DS_Store
 openapi.yaml
