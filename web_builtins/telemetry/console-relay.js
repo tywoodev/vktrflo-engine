@@ -1,7 +1,7 @@
 /**
  * console-relay.js
  * Intercepts browser console output and forwards it to the VectorFlow
- * telemetry endpoint, which relays entries into the local Redis instance.
+ * telemetry endpoint, which relays entries into the configured cache provider.
  *
  * Behaviour:
  *  - Hooks console.log / info / warn / error / debug
@@ -12,7 +12,7 @@
  */
 
 const ENDPOINT   = "/api/telemetry/console";
-const KEY        = "vktrflo:console";
+const KEY        = "browser.console";
 const FLUSH_INTERVAL_MS = 1000;
 const FLUSH_BATCH_SIZE  = 20;
 const MAX_MSG_LENGTH    = 4096;

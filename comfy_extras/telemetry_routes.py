@@ -1,40 +1,19 @@
 """
 comfy_extras/telemetry_routes.py
 Aiohttp routes for the VectorFlow telemetry pipeline.
-Currently handles browser console relay → Redis list.
+Currently handles browser console relay → configured cache provider.
 """
 from __future__ import annotations
 
-import json
 import logging
 import time
 from typing import Any
 
-import redis
 from aiohttp import web
+from app.log_cache import append_entries
 
 _log = logging.getLogger("VF.telemetry")
-
-_DEFAULT_KEY    = "vktrflo:console"
-_MAX_LIST_LEN   = 50_000
-_redis: redis.Redis | None = None
-
-
-def _get_redis() -> redis.Redis:
-    global _redis
-    if _redis is None:
-        _redis = redis.Redis(host="127.0.0.1", port=6379, decode_responses=True)
-    return _redis
-
-
-def _push_batch(key: str, entries: list[dict[str, Any]]) -> int:
-    r = _get_redis()
-    pipe = r.pipeline()
-    for entry in entries:
-        pipe.rpush(key, json.dumps(entry))
-    pipe.ltrim(key, -_MAX_LIST_LEN, -1)
-    pipe.execute()
-    return len(entries)
+_DEFAULT_STREAM = "browser.console"
 
 
 def register(routes: web.RouteTableDef) -> None:
@@ -46,7 +25,7 @@ def register(routes: web.RouteTableDef) -> None:
             return web.Response(status=400, text="invalid json")
 
         entries: list[dict] = body.get("entries", [])
-        key: str = body.get("key", _DEFAULT_KEY)
+        stream: str = body.get("key", _DEFAULT_STREAM)
 
         if not entries:
             return web.Response(status=204)
@@ -55,10 +34,11 @@ def register(routes: web.RouteTableDef) -> None:
         now = time.time()
         for e in entries:
             e.setdefault("server_ts", now)
+            e.setdefault("source", "engine.browser")
 
         try:
-            n = _push_batch(key, entries)
+            n = append_entries(stream, entries)
             return web.json_response({"ok": True, "pushed": n})
         except Exception as exc:
-            _log.error("Redis push failed: %s", exc)
-            return web.Response(status=503, text="redis unavailable")
+            _log.error("Cache push failed: %s", exc)
+            return web.Response(status=503, text="cache unavailable")
